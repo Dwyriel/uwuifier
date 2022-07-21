@@ -3,6 +3,7 @@
 #include <thread>
 #include "Logger.h"
 #include "UwUifier.h"
+#include <fstream>
 
 #define UWUIFIED
 
@@ -30,8 +31,29 @@ static std::string FILE_OUTPUT_MESSAGE = "Uwufied fiwe:";
 const std::string help1 = "-h", help2 = "--help";
 const std::string file_cmd = "-f", text_cmd = "-t", output_file_cmd = "-o";
 
+static std::string PROGRAM_PATH = "";
+
+void setProgramPath(char* relative_path){
+    PROGRAM_PATH = realpath(relative_path, NULL);
+    size_t pos = PROGRAM_PATH.find_last_of("/");
+    PROGRAM_PATH.erase(pos+1);
+}
+
 int main(int argc, char **argv) {
-    std::string result, arg1, arg2, arg3, arg4;
+
+    setProgramPath(argv[0]);
+    Logger::LogInfo(PROGRAM_PATH);
+
+    return 0 ;
+
+    std::ofstream outfile ("test.txt");
+
+    outfile << "my text here!" << std::endl;
+
+    outfile.close();
+
+    return 0;
+    std::string result, firstCommand, text, secondCommand, outputFile;
     bool outputToFile = false;
     if(argc==1){
         Logger::LogError(NO_ARG_PASSED);
@@ -43,37 +65,37 @@ int main(int argc, char **argv) {
             std::cout << "\033[38;5;252m" << "I can't hewp yowo yet, sowwy >.<" << std::endl;
             return 0;
         }
-        arg1 = argv[1];
-        if(arg1.compare(text_cmd) && arg1.compare(file_cmd)){
+        firstCommand = argv[1];
+        if(firstCommand.compare(text_cmd) && firstCommand.compare(file_cmd)){
             Logger::LogWarning(INVALID_COMMAND);
             return 1;
         }
         if(argc<=2){
-            if(!arg1.compare(text_cmd))
+            if(!firstCommand.compare(text_cmd))
                 Logger::LogWarning(NO_TEXT_ARG_PASSED);
-            if(!arg1.compare(file_cmd))
+            if(!firstCommand.compare(file_cmd))
                 Logger::LogWarning(NO_FILE_ARG_PASSED);
             return 1;
         }
-        arg2 = argv[2];
+        text = argv[2];
         if(argc>4){
-            arg3 = argv[3];
-            arg4 = argv[4];
-            if(!arg3.compare(output_file_cmd)){
+            secondCommand = argv[3];
+            outputFile = argv[4];
+            if(!secondCommand.compare(output_file_cmd)){
                 //verify if output file is valid (if it doesn't exist already, if it can be created, etc)
                 Logger::LogInfo("Outputing to file");
                 outputToFile = true;
             }
         }
-        if(!arg1.compare(text_cmd)){
-            result = UwUifier::uwuify(arg2);
+        if(!firstCommand.compare(text_cmd)){
+            UwUifier::uwuify(text);
             if(!outputToFile){
                 Logger::Log(LogLevel::None, TEXT_OUTPUT_MESSAGE);
-                Logger::Log(LogLevel::None, result);
+                Logger::Log(LogLevel::None, text);
                 return 0;
             }
         }
-        if(!arg1.compare(file_cmd)){
+        if(!firstCommand.compare(file_cmd)){
             result = "";
             //TODO read from file
             if(!outputToFile){

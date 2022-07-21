@@ -15,7 +15,7 @@ namespace UwUifier{
         "L", "W"
     };
 
-    static std::string swapWith(std::string text, std::string textToFind, std::string textToImplement){
+    static void swapWith(std::string &text, std::string &textToFind, std::string &textToImplement){
         size_t pos = text.find(textToFind);
         std::string tempStr = "";
         while(pos != std::string::npos){
@@ -29,14 +29,43 @@ namespace UwUifier{
             pos = text.find(textToFind);
         }
         tempStr.append(text);
-        return tempStr;
+        text.swap(tempStr);
+    }
+    static void swapWithByWord(std::vector<std::string> &words, std::string &textToFind, std::string &textToImplement){
+        for(std::string &word : words){
+            size_t pos = word.find(textToFind);
+            while(pos != std::string::npos){
+                word.replace(pos, textToFind.length(), textToImplement);
+                pos = word.find(textToFind);
+            }
+        }
     }
 
-    static std::string uwuify(std::string text){
-        std::string retStr = text;
+    static void uwuify(std::string &text){
         for(int index = 0; index < swapPairs.size(); index+=2)
-            retStr = swapWith(retStr, swapPairs[index], swapPairs[index+1]);
-        return retStr;
+            swapWith(text, swapPairs[index], swapPairs[index+1]);
+    }
+
+    static void uwuifyByWord(std::string &text){
+        const std::string space = " ";
+        std::vector<std::string> words;
+        size_t pos = text.find(space);
+        while(pos != std::string::npos){
+            char buffer[pos+1];
+            text.copy(buffer, pos);
+            buffer[pos] = '\0';
+            text.erase(0, pos+1);
+            words.push_back(buffer);
+            pos = text.find(space);
+        }
+        words.push_back(text);
+        text.clear();
+        for(int index = 0; index < swapPairs.size(); index+=2)
+            swapWithByWord(std::ref(words), swapPairs[index], swapPairs[index+1]);
+        for(std::string word : words){
+            text += word + space;
+        }
+        text.pop_back();
     }
 
 }
