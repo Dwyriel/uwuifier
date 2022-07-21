@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <thread>
-#include <vector>
 #include "Logger.h"
 #include "UwUifier.h"
 
@@ -31,9 +30,17 @@ static std::string FILE_OUTPUT_MESSAGE = "Uwufied fiwe:";
 const std::string help1 = "-h", help2 = "--help";
 const std::string file_cmd = "-f", text_cmd = "-t";
 
-std::string uwufy(std::string text);
+int main(int argc, char **argv) {/*
+    std::string text = "nano is ok, rodopiante, laranja";
 
-int main(int argc, char **argv) {
+    Logger::LogInfo(UwUifier::uwuify(text));
+
+
+    return 0;*/
+    Logger::Log(LogLevel::None, TEXT_OUTPUT_MESSAGE);
+    Logger::Log(LogLevel::None, UwUifier::uwuify("The affectionate stuff that people do when they are in love, such as kissing and hugging.\nHaving strong feelings of happiness or satisfaction.\nFutilely pursuing something that will never be attainable."));
+    return 0;
+
     std::string arg1, arg2;
     if(argc==1){
         Logger::LogError(NO_ARG_PASSED);
@@ -60,7 +67,7 @@ int main(int argc, char **argv) {
         arg2 = argv[2];
         if(!arg1.compare(text_cmd)){
             Logger::Log(LogLevel::None, TEXT_OUTPUT_MESSAGE);
-            Logger::Log(LogLevel::None, uwufy(arg2));
+            Logger::Log(LogLevel::None, UwUifier::uwuify(arg2));
         }
         if(!arg1.compare(file_cmd)){
             Logger::Log(LogLevel::None, FILE_OUTPUT_MESSAGE);
@@ -71,7 +78,3 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-    std::string uwufy(std::string text){
-
-        return text;
-    }
