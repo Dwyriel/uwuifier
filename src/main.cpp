@@ -28,20 +28,11 @@ static std::string FILE_OUTPUT_MESSAGE = "Uwufied fiwe:";
 
 // Arguments
 const std::string help1 = "-h", help2 = "--help";
-const std::string file_cmd = "-f", text_cmd = "-t";
+const std::string file_cmd = "-f", text_cmd = "-t", output_file_cmd = "-o";
 
-int main(int argc, char **argv) {/*
-    std::string text = "nano is ok, rodopiante, laranja";
-
-    Logger::LogInfo(UwUifier::uwuify(text));
-
-
-    return 0;*/
-    Logger::Log(LogLevel::None, TEXT_OUTPUT_MESSAGE);
-    Logger::Log(LogLevel::None, UwUifier::uwuify("The affectionate stuff that people do when they are in love, such as kissing and hugging.\nHaving strong feelings of happiness or satisfaction.\nFutilely pursuing something that will never be attainable."));
-    return 0;
-
-    std::string arg1, arg2;
+int main(int argc, char **argv) {
+    std::string result, arg1, arg2, arg3, arg4;
+    bool outputToFile = false;
     if(argc==1){
         Logger::LogError(NO_ARG_PASSED);
         return 1;
@@ -65,16 +56,34 @@ int main(int argc, char **argv) {/*
             return 1;
         }
         arg2 = argv[2];
+        if(argc>4){
+            arg3 = argv[3];
+            arg4 = argv[4];
+            if(!arg3.compare(output_file_cmd)){
+                //verify if output file is valid (if it doesn't exist already, if it can be created, etc)
+                Logger::LogInfo("Outputing to file");
+                outputToFile = true;
+            }
+        }
         if(!arg1.compare(text_cmd)){
-            Logger::Log(LogLevel::None, TEXT_OUTPUT_MESSAGE);
-            Logger::Log(LogLevel::None, UwUifier::uwuify(arg2));
+            result = UwUifier::uwuify(arg2);
+            if(!outputToFile){
+                Logger::Log(LogLevel::None, TEXT_OUTPUT_MESSAGE);
+                Logger::Log(LogLevel::None, result);
+                return 0;
+            }
         }
         if(!arg1.compare(file_cmd)){
-            Logger::Log(LogLevel::None, FILE_OUTPUT_MESSAGE);
-            //TODO file stuff
+            result = "";
+            //TODO read from file
+            if(!outputToFile){
+                Logger::Log(LogLevel::None, FILE_OUTPUT_MESSAGE);
+                Logger::Log(LogLevel::None, result);
+                return 0;
+            }
         }
     }
-
+    //writeToFile
     return 0;
 }
 
