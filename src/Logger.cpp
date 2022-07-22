@@ -25,7 +25,7 @@ class Logger
 public:
 
     template <typename T>
-    static void Log(const char& level, T const& log_text, const bool& writeToFile = false){
+    static void Log(T const& log_text, const char& level = LogLevel::None, const bool& writeToFile = false){
         std::string prefix, color;
         switch (level){
             case None:
@@ -55,16 +55,16 @@ public:
 
     template <typename T>
     static void LogError(T const& log_text, const bool& writeToFile = false){
-        Logger::Log(LogLevel::ErrorLog, log_text, writeToFile);
+        Logger::Log(log_text, LogLevel::ErrorLog, writeToFile);
     }
 
     template <typename T>
     static void LogWarning(T const& log_text, const bool& writeToFile = false){
-        Logger::Log(LogLevel::WarningLog, log_text, writeToFile);
+        Logger::Log(log_text, LogLevel::WarningLog, writeToFile);
     }
 
     template <typename T>
     static void LogInfo(T const& log_text, const bool& writeToFile = false){
-        Logger::Log(LogLevel::InfoLog, log_text, writeToFile);
+        Logger::Log(log_text, LogLevel::InfoLog, writeToFile);
     }
 };

@@ -1,67 +1,64 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <fstream>
+#include <filesystem>
+
 #include "Logger.h"
 #include "UwUifier.h"
-#include <fstream>
 
-#define UWUIFIED
+#define UWUIFIED 1
 
 // Error/Warning/Help messages
-#ifndef UWUIFIED
+#if UWUIFIED == 0
 static std::string NO_ARG_PASSED = "No arguments passed";
 static std::string HELP_COMMAND = "?";
 static std::string INVALID_COMMAND = "Invalid argument, try -h or --help for help";
 static std::string NO_TEXT_ARG_PASSED = "No text passed";
 static std::string NO_FILE_ARG_PASSED = "No file passed";
-static std::string TEXT_OUTPUT_MESSAGE = "Uwufied text:";
-static std::string FILE_OUTPUT_MESSAGE = "Uwufied file:";
+static std::string TEXT_OUTPUT_MESSAGE = "UwUfied text:";
+static std::string FILE_OUTPUT_MESSAGE = "UwUfied file:";
+static std::string FILE_DOESNT_EXIST = "File doesn't exist";
 #endif
-#ifdef UWUIFIED
+#if UWUIFIED == 1
 static std::string NO_ARG_PASSED = "Nyo awguwumewnts passed";
 static std::string HELP_COMMAND = "?";
-static std::string INVALID_COMMAND = "Invawid awguwumewnt, twy -h ow --help fow hewp";
+static std::string INVALID_COMMAND = "Invawid awgument, twy -h ow --hewp fow hewp";
 static std::string NO_TEXT_ARG_PASSED = "Nyo text passed";
 static std::string NO_FILE_ARG_PASSED = "Nyo fiwe passed";
-static std::string TEXT_OUTPUT_MESSAGE = "Uwufied text:";
-static std::string FILE_OUTPUT_MESSAGE = "Uwufied fiwe:";
+static std::string TEXT_OUTPUT_MESSAGE = "UwUfied text:";
+static std::string FILE_OUTPUT_MESSAGE = "UwUfied fiwe:";
+static std::string FILE_DOESNT_EXIST = "Fiwe doesn't exist";
 #endif
 
 // Arguments
-const std::string help1 = "-h", help2 = "--help";
+const std::string help1 = "-h", help2 = "--help", help3 = "--hewp";
 const std::string file_cmd = "-f", text_cmd = "-t", output_file_cmd = "-o";
 
-static std::string PROGRAM_PATH = "";
+static std::string EXEC_FOLDER_PATH = "";
+static std::string EXECUTABLE_PATH = "";
 
-void setProgramPath(char* relative_path){
-    PROGRAM_PATH = realpath(relative_path, NULL);
-    size_t pos = PROGRAM_PATH.find_last_of("/");
-    PROGRAM_PATH.erase(pos+1);
+void setProgramPaths(char* relative_path){
+    /*char* pointer = realpath(relative_path, NULL);
+    if(pointer == NULL)
+        return false;*///leaving it here for reference or in case it may be better
+
+    EXECUTABLE_PATH =  std::filesystem::canonical(relative_path);
+    size_t pos = EXECUTABLE_PATH.find_last_of("/");
+    EXEC_FOLDER_PATH = EXECUTABLE_PATH.substr(0, pos+1);
 }
 
-int main(int argc, char **argv) {
-
-    setProgramPath(argv[0]);
-    Logger::LogInfo(PROGRAM_PATH);
-
-    return 0 ;
-
-    std::ofstream outfile ("test.txt");
-
-    outfile << "my text here!" << std::endl;
-
-    outfile.close();
-
-    return 0;
-    std::string result, firstCommand, text, secondCommand, outputFile;
+int main(int argc, char **argv) {//TODO rework all this garbage
+    std::string firstCommand, text, secondCommand, outputFile;
     bool outputToFile = false;
+    setProgramPaths(argv[0]);
     if(argc==1){
         Logger::LogError(NO_ARG_PASSED);
         return 1;
     }
     if(argc > 1){
         //help command
-        if((help1.compare(argv[1]) == 0 || help2.compare(argv[1]) == 0)){ //TODO help command
+        if(help1.compare(argv[1]) == 0 || help2.compare(argv[1]) == 0 || help3.compare(argv[1]) == 0){ //TODO help command
             std::cout << "\033[38;5;252m" << "I can't hewp yowo yet, sowwy >.<" << std::endl;
             return 0;
         }
@@ -82,30 +79,44 @@ int main(int argc, char **argv) {
             secondCommand = argv[3];
             outputFile = argv[4];
             if(!secondCommand.compare(output_file_cmd)){
-                //verify if output file is valid (if it doesn't exist already, if it can be created, etc)
-                Logger::LogInfo("Outputing to file");
+                //TODO verify if output file is valid (if it doesn't exist already, if it can be created, etc)
+                Logger::LogInfo("Outputing to file..");
                 outputToFile = true;
             }
         }
         if(!firstCommand.compare(text_cmd)){
             UwUifier::uwuify(text);
             if(!outputToFile){
-                Logger::Log(LogLevel::None, TEXT_OUTPUT_MESSAGE);
-                Logger::Log(LogLevel::None, text);
+                Logger::Log(TEXT_OUTPUT_MESSAGE+"\n");
+                Logger::Log(text);
                 return 0;
             }
         }
         if(!firstCommand.compare(file_cmd)){
-            result = "";
-            //TODO read from file
+            std::stringstream stream;
+            std::string line, filePath = "";
+            std::fstream file;
+            filePath.swap(text);
+            if(!std::filesystem::exists(filePath)){
+                Logger::LogError(FILE_DOESNT_EXIST);
+                return 1;
+            }
+            file.open(filePath);
+            while (std::getline(file, line)){
+                stream << line << std::endl;
+                text += stream.str();
+                stream.str(std::string());
+            }
+            file.close();
+            UwUifier::uwuifyByWord(text);
             if(!outputToFile){
-                Logger::Log(LogLevel::None, FILE_OUTPUT_MESSAGE);
-                Logger::Log(LogLevel::None, result);
+                Logger::Log(FILE_OUTPUT_MESSAGE+"\n");
+                Logger::Log(text);
                 return 0;
             }
         }
     }
-    //writeToFile
+    //TODO writeToFile
     return 0;
 }
 
