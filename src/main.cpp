@@ -11,7 +11,7 @@
 
 // Error/Warning/Help messages
 #if UWUIFIED == 0
-static std::string NO_ARG_PASSED = "No arguments passed";
+static std::string NO_ARG_PASSED = "No arguments passed, try -h or --help for help";
 static std::string HELP_COMMAND = "?";
 static std::string INVALID_COMMAND = "Invalid argument, try -h or --help for help";
 static std::string NO_TEXT_ARG_PASSED = "No text passed";
@@ -21,7 +21,7 @@ static std::string FILE_OUTPUT_MESSAGE = "UwUfied file:";
 static std::string FILE_DOESNT_EXIST = "File doesn't exist";
 #endif
 #if UWUIFIED == 1
-static std::string NO_ARG_PASSED = "Nyo awguwumewnts passed";
+static std::string NO_ARG_PASSED = "Nyo awguwumewnts passed, twy -h ow --hewp fow hewp";
 static std::string HELP_COMMAND = "?";
 static std::string INVALID_COMMAND = "Invawid awgument, twy -h ow --hewp fow hewp";
 static std::string NO_TEXT_ARG_PASSED = "Nyo text passed";
@@ -41,7 +41,7 @@ static std::string EXECUTABLE_PATH = "";
 void setProgramPaths(char* relative_path){
     /*char* pointer = realpath(relative_path, NULL);
     if(pointer == NULL)
-        return false;*///leaving it here for reference or in case it may be better
+        return false;*///leaving it here for reference or in case it may be better (pre C++17, though linux only)
 
     EXECUTABLE_PATH =  std::filesystem::canonical(relative_path);
     size_t pos = EXECUTABLE_PATH.find_last_of("/");
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {//TODO rework all this garbage
     bool outputToFile = false;
     setProgramPaths(argv[0]);
     if(argc==1){
-        Logger::LogError(NO_ARG_PASSED);
+        Logger::LogWarning(NO_ARG_PASSED);
         return 1;
     }
     if(argc > 1){
@@ -64,14 +64,14 @@ int main(int argc, char **argv) {//TODO rework all this garbage
         }
         firstCommand = argv[1];
         if(firstCommand.compare(text_cmd) && firstCommand.compare(file_cmd)){
-            Logger::LogWarning(INVALID_COMMAND);
+            Logger::LogError(INVALID_COMMAND);
             return 1;
         }
         if(argc<=2){
             if(!firstCommand.compare(text_cmd))
-                Logger::LogWarning(NO_TEXT_ARG_PASSED);
+                Logger::LogError(NO_TEXT_ARG_PASSED);
             if(!firstCommand.compare(file_cmd))
-                Logger::LogWarning(NO_FILE_ARG_PASSED);
+                Logger::LogError(NO_FILE_ARG_PASSED);
             return 1;
         }
         text = argv[2];
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {//TODO rework all this garbage
             std::string line, filePath = "";
             std::fstream file;
             filePath.swap(text);
-            if(!std::filesystem::exists(filePath)){
+            if(!std::filesystem::is_regular_file(filePath)){
                 Logger::LogError(FILE_DOESNT_EXIST);
                 return 1;
             }
