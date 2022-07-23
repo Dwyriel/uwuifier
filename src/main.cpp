@@ -11,36 +11,54 @@
 
 // Error/Warning/Help messages
 #if UWUIFIED == 0
-static std::string NO_ARG_PASSED = "No arguments passed, try -h or --help for help";
-static std::string HELP_COMMAND = "?";
-static std::string INVALID_COMMAND = "Invalid argument, try -h or --help for help";
-static std::string NO_TEXT_ARG_PASSED = "No text passed";
-static std::string NO_FILE_ARG_PASSED = "No file passed";
-static std::string TEXT_OUTPUT_MESSAGE = "UwUfied text:";
-static std::string FILE_OUTPUT_MESSAGE = "UwUfied file:";
-static std::string OUTPUTING_TO_FILE = "Outputing to file..";
-static std::string FILE_DOESNT_EXIST = "Input file doesn't exist";
-static std::string FILE_ALREADY_EXIST = "Output file already exist, pass --force to overwrite it";
+#define INVALID_COMMAND(str) ("Invalid argument " + '"' + str + '"' + ". try -h or --help for help")
+#define NO_ARG_PASSED "No arguments passed, try -h or --help for help"
+#define HELP_COMMAND "I can't help you yet, sorry :("
+#define NO_TEXT_ARG_PASSED "No text passed"
+#define NO_FILE_ARG_PASSED "No file passed"
+#define NO_OUTPUT_FILE_ARG_PASSED "No output file passed"
+#define FILE_DOESNT_EXIST "Input file doesn't exist"
+#define TEXT_OR_FILE_ARGS_NOT_PASSED "Neither \"-t\" or \"-f\" arguments passed"
+#define TEXT_AND_FILE_ARGS_PASSED "Both \"-t\" and \"-f\" arguments passed"
+#define TEXT_OUTPUT_MESSAGE "UwUfied text:"
+#define FILE_OUTPUT_MESSAGE "UwUfied file:"
+#define FILE_ALREADY_EXIST "Output file already exist, pass --force to overwrite it"
+#define EXPORTED_TO_FILE(str) ("Exported to " + str)
 #endif
 #if UWUIFIED == 1
-static std::string NO_ARG_PASSED = "Nyo awguwumewnts passed, twy -h ow --hewp fow hewp";
-static std::string HELP_COMMAND = "?";
-static std::string INVALID_COMMAND = "Invawid awgument, twy -h ow --hewp fow hewp";
-static std::string NO_TEXT_ARG_PASSED = "Nyo text passed";
-static std::string NO_FILE_ARG_PASSED = "Nyo fiwe passed";
-static std::string TEXT_OUTPUT_MESSAGE = "UwUfied text:";
-static std::string FILE_OUTPUT_MESSAGE = "UwUfied fiwe:";
-static std::string OUTPUTING_TO_FILE = "Outputing to fiwe..";
-static std::string FILE_DOESNT_EXIST = "Input fiwe doesn't exist";
-static std::string FILE_ALREADY_EXIST = "Output fiwe aw-weady exist, pass --fowce to ovew-wwite it";
+#define INVALID_COMMAND(str) ("Invawid awgument \"" + str + "\". twy -h ow --hewp fow hewp")
+#define NO_ARG_PASSED "Nyo awguments passed, twy -h ow --hewp fow hewp"
+#define HELP_COMMAND "I can't hewp yowo yet, sowwy >.<"
+#define NO_TEXT_ARG_PASSED "Nyo text passed"
+#define NO_FILE_ARG_PASSED "Nyo fiwe passed"
+#define NO_OUTPUT_FILE_ARG_PASSED "Nyo output fiwe passed"
+#define FILE_DOESNT_EXIST "Input fiwe doesn't exist"
+#define TEXT_OR_FILE_ARGS_NOT_PASSED "Neithew \"-t\" or \"-f\" awguments passed"
+#define TEXT_AND_FILE_ARGS_PASSED "Both \"-t\" and \"-f\" awguments passed"
+#define TEXT_OUTPUT_MESSAGE "UwUfied text:"
+#define FILE_OUTPUT_MESSAGE "UwUfied fiwe:"
+#define FILE_ALREADY_EXIST "Output fiwe aw-weady exist, pass --fowce to ovew-wwite it"
+#define EXPORTED_TO_FILE(str) ("Expowted to " + str)
 #endif
 
 // Arguments
-const std::string help1 = "-h", help2 = "--help", help3 = "--hewp";
-const std::string file_cmd = "-f", text_cmd = "-t", output_file_cmd = "-o", force_file_write1 = "--force", force_file_write2 = "--fowce";
+#define HELP_CMD1 "-h"
+#define HELP_CMD2 "--help"
+#define HELP_CMD3 "--hewp"
+#define TEXT_CMD1 "-t"
+#define TEXT_CMD2 "--text"
+#define FILE_CMD1 "-f"
+#define FILE_CMD2 "--file"
+#define FILE_CMD3 "--fiwe"
+#define OUTPUT_FILE_CMD1 "-o"
+#define OUTPUT_FILE_CMD2 "--output"
+#define FORCE_FILE_WRITE1 "--force"
+#define FORCE_FILE_WRITE2 "--fowce"
+#define CMD_COUNT 12
+const char* ALL_CMDS[CMD_COUNT] = {HELP_CMD1, HELP_CMD2, HELP_CMD3, TEXT_CMD1, TEXT_CMD2, FILE_CMD1, FILE_CMD2, FILE_CMD3, OUTPUT_FILE_CMD1, OUTPUT_FILE_CMD2, FORCE_FILE_WRITE1, FORCE_FILE_WRITE2};
 
-static std::string EXEC_FOLDER_PATH = "";
-static std::string EXECUTABLE_PATH = "";
+static std::string EXEC_FOLDER_PATH;
+static std::string EXECUTABLE_PATH;
 
 void setProgramPaths(char* relative_path){
     /*char* pointer = realpath(relative_path, NULL);
@@ -52,89 +70,117 @@ void setProgramPaths(char* relative_path){
     EXEC_FOLDER_PATH = EXECUTABLE_PATH.substr(0, pos+1);
 }
 
-int main(int argc, char **argv) {//TODO rework all this garbage
-    std::string firstCommand, text, secondCommand, outputFile, thirdCommand;
-    bool outputToFile = false, shouldForceFileWrite = false;
-    setProgramPaths(argv[0]);
-    if(argc==1){
+bool checkIfTextIsCommand(std::string str){
+    for(int i = 0; i < CMD_COUNT; i++){
+        if(str.compare(ALL_CMDS[i]) == 0)
+            return true;
+    }
+    return false;
+}
+
+int main(int argc, char **argv) {
+    if(argc <= 1){
         Logger::LogWarning(NO_ARG_PASSED);
         return 1;
     }
-    if(argc > 1){
-        //help command
-        if(help1.compare(argv[1]) == 0 || help2.compare(argv[1]) == 0 || help3.compare(argv[1]) == 0){ //TODO help command
-            std::cout << "\033[38;5;252m" << "I can't hewp yowo yet, sowwy >.<" << std::endl;
+    std::vector<std::string> args;
+    for (int index = 1; index < argc; index ++)
+        args.push_back(argv[index]);
+    bool fromText = false, fromFile = false, writeToFile = false, forceWriteToFile = false;
+    std::string text, inputFile, outputFile;
+    for(int index = 0; index < args.size(); index++){
+        if(!checkIfTextIsCommand(args[index])){
+            Logger::LogError(INVALID_COMMAND(args[index]));
+            return 1;
+        }
+        if(args[index].compare(HELP_CMD1) == 0 || args[index].compare(HELP_CMD2) == 0 || args[index].compare(HELP_CMD3) == 0){
+            Logger::LogNone(HELP_COMMAND);
             return 0;
         }
-        firstCommand = argv[1];
-        if(firstCommand.compare(text_cmd) && firstCommand.compare(file_cmd)){
-            Logger::LogError(INVALID_COMMAND);
-            return 1;
-        }
-        if(argc<=2){
-            if(!firstCommand.compare(text_cmd))
+        if(args[index].compare(TEXT_CMD1) == 0 || args[index].compare(TEXT_CMD2) == 0){
+            if(++index >= args.size()){
                 Logger::LogError(NO_TEXT_ARG_PASSED);
-            if(!firstCommand.compare(file_cmd))
+                return 1;
+            }
+            fromText = true;
+            text = args[index];
+            if(checkIfTextIsCommand(text)){
+                Logger::LogError(NO_TEXT_ARG_PASSED);
+                return 1;
+            }
+        }
+        if(args[index].compare(FILE_CMD1) == 0 || args[index].compare(FILE_CMD2) == 0 || args[index].compare(FILE_CMD3) == 0){
+            if(++index >= args.size()){
                 Logger::LogError(NO_FILE_ARG_PASSED);
-            return 1;
-        }
-        text = argv[2];
-        if(argc>4){
-            secondCommand = argv[3];
-            outputFile = argv[4];
-            if(!secondCommand.compare(output_file_cmd)){
-                Logger::LogInfo(OUTPUTING_TO_FILE);
-                outputToFile = true;
+                return 1;
             }
-        }
-        if(argc>5){
-            thirdCommand = argv[5];
-            if(!thirdCommand.compare(force_file_write1) || !thirdCommand.compare(force_file_write2))
-                shouldForceFileWrite = true;
-        }
-        if(!firstCommand.compare(text_cmd)){
-            UwUifier::uwuify(text);
-            if(!outputToFile){
-                Logger::Log(TEXT_OUTPUT_MESSAGE+"\n");
-                Logger::Log(text);
-                return 0;
+            fromFile = true;
+            inputFile = args[index];
+            if(checkIfTextIsCommand(inputFile)){
+                Logger::LogError(NO_FILE_ARG_PASSED);
+                return 1;
             }
-        }
-        if(!firstCommand.compare(file_cmd)){
-            std::stringstream stream;
-            std::string line, filePath = "";
-            std::fstream file;
-            filePath.swap(text);
-            if(!std::filesystem::is_regular_file(filePath)){
+            if(!std::filesystem::is_regular_file(inputFile)){
                 Logger::LogError(FILE_DOESNT_EXIST);
                 return 1;
             }
-            file.open(filePath, std::ios::in);
-            while (std::getline(file, line)){
-                stream << line << std::endl;
-                text += stream.str();
-                stream.str(std::string());
-            }
-            file.close();
-            UwUifier::uwuifyByWord(text);
-            if(!outputToFile){
-                Logger::Log(FILE_OUTPUT_MESSAGE+"\n");
-                Logger::Log(text);
-                return 0;
-            }
         }
+        if(args[index].compare(OUTPUT_FILE_CMD1) == 0 || args[index].compare(OUTPUT_FILE_CMD2) == 0){
+            if(++index >= args.size()){
+                Logger::LogError(NO_OUTPUT_FILE_ARG_PASSED);
+                return 1;
+            }
+            writeToFile = true;
+            outputFile = args[index];
+            if(checkIfTextIsCommand(outputFile)){
+                Logger::LogError(NO_OUTPUT_FILE_ARG_PASSED);
+                return 1;
+            }
+            //TODO verify if name is valid
+        }
+        if(args[index].compare(FORCE_FILE_WRITE1) == 0 || args[index].compare(FORCE_FILE_WRITE2) == 0)
+            forceWriteToFile = true;
     }
-    if(!shouldForceFileWrite){
+    if(!fromText && !fromFile){
+        Logger::LogError(TEXT_OR_FILE_ARGS_NOT_PASSED);
+        return 1;
+    }
+    if(fromText && fromFile){
+        Logger::LogError(TEXT_AND_FILE_ARGS_PASSED);
+        return 1;
+    }
+    if(writeToFile && !forceWriteToFile){
         if(std::filesystem::exists(outputFile)){
             Logger::LogError(FILE_ALREADY_EXIST);
             return 1;
         }
     }
-    std::fstream file;
-    file.open(outputFile, std::ios::out | std::ios::trunc);
-    file << text;
-    file.close();
-    Logger::LogInfo("Done!");
+    if(fromText)
+        UwUifier::uwuify(text);
+    if(fromFile){
+        std::stringstream stream;
+        std::string line;
+        std::fstream file;
+        file.open(inputFile, std::ios::in);
+        while (std::getline(file, line)){
+            stream << line << std::endl;
+            text += stream.str();
+            stream.str(std::string());
+        }
+        file.close();
+        UwUifier::uwuifyByWord(text);
+    }
+    if(writeToFile){
+        std::fstream file;
+        file.open(outputFile, std::ios::out | std::ios::trunc);
+        file << text;
+        file.close();
+        Logger::LogInfo(EXPORTED_TO_FILE(outputFile));
+        return 0;
+    }
+    Logger::Log((fromText) ? TEXT_OUTPUT_MESSAGE : FILE_OUTPUT_MESSAGE);
+    Logger::Log("");
+    Logger::Log(text);
     return 0;
 }
 

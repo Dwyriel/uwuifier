@@ -31,6 +31,7 @@ namespace UwUifier{
         tempStr.append(text);
         text.swap(tempStr);
     }
+
     static void swapWithByWord(std::vector<std::string> &words, std::string &textToFind, std::string &textToImplement){
         for(std::string &word : words){
             size_t pos = word.find(textToFind);
