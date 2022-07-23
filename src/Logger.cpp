@@ -54,6 +54,11 @@ public:
     }
 
     template <typename T>
+    static void LogNone(T const& log_text, const bool& writeToFile = false){
+        Logger::Log(log_text, LogLevel::None, writeToFile);
+    }
+
+    template <typename T>
     static void LogError(T const& log_text, const bool& writeToFile = false){
         Logger::Log(log_text, LogLevel::ErrorLog, writeToFile);
     }
