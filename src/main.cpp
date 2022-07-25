@@ -23,6 +23,8 @@
 #define TEXT_OUTPUT_MESSAGE "UwUfied text:"
 #define FILE_OUTPUT_MESSAGE "UwUfied file:"
 #define FILE_ALREADY_EXIST "Output file already exist, pass --force to overwrite it"
+#define COULDNT_OPEN_FILE "Error occured while opening the file"
+#define COULDNT_WRITE_TO_FILE "Error occured when trying to write to the output file"
 #define EXPORTED_TO_FILE(str) ("Exported to " + str)
 #endif
 #if UWUIFIED == 1
@@ -38,6 +40,8 @@
 #define TEXT_OUTPUT_MESSAGE "UwUfied text:"
 #define FILE_OUTPUT_MESSAGE "UwUfied fiwe:"
 #define FILE_ALREADY_EXIST "Output fiwe aw-weady exist, pass --fowce to ovew-wwite it"
+#define COULDNT_OPEN_FILE "Ewwow occuwed while opening the fiwe"
+#define COULDNT_WRITE_TO_FILE "Ewwow occuwed when twying to wwite to the output fiwe"
 #define EXPORTED_TO_FILE(str) ("Expowted to " + str)
 #endif
 
@@ -162,6 +166,10 @@ int main(int argc, char **argv) {
         std::string line;
         std::fstream file;
         file.open(inputFile, std::ios::in);
+        if(file.bad()){
+            Logger::LogError(COULDNT_OPEN_FILE);
+            return 1;
+        }
         while (std::getline(file, line)){
             stream << line << std::endl;
             text += stream.str();
@@ -173,6 +181,10 @@ int main(int argc, char **argv) {
     if(writeToFile){
         std::fstream file;
         file.open(outputFile, std::ios::out | std::ios::trunc);
+        if(file.bad()){
+            Logger::LogError(COULDNT_WRITE_TO_FILE);
+            return 1;
+        }
         file << text;
         file.close();
         Logger::LogInfo(EXPORTED_TO_FILE(outputFile));
