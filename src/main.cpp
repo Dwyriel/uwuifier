@@ -64,19 +64,19 @@ const char* ALL_CMDS[CMD_COUNT] = {HELP_CMD1, HELP_CMD2, HELP_CMD3, TEXT_CMD1, T
 static std::string EXEC_FOLDER_PATH;
 static std::string EXECUTABLE_PATH;
 
-void setProgramPaths(char* relative_path){
+void setProgramPaths(const char* relative_path){
     /*char* pointer = realpath(relative_path, NULL);
     if(pointer == NULL)
         return false;*///leaving it here for reference or in case it may be better (pre C++17, though linux only)
 
     EXECUTABLE_PATH =  std::filesystem::canonical(relative_path);
-    size_t pos = EXECUTABLE_PATH.find_last_of("/");
+    size_t pos = EXECUTABLE_PATH.find_last_of('/');
     EXEC_FOLDER_PATH = EXECUTABLE_PATH.substr(0, pos+1);
 }
 
-bool checkIfTextIsCommand(std::string str){
-    for(int i = 0; i < CMD_COUNT; i++){
-        if(str.compare(ALL_CMDS[i]) == 0)
+bool checkIfTextIsCommand(std::string& str){
+    for(const char* &string : ALL_CMDS){
+        if(str == string)
             return true;
     }
     return false;
@@ -97,11 +97,11 @@ int main(int argc, char **argv) {
             Logger::LogError(INVALID_COMMAND(args[index]));
             return 1;
         }
-        if(args[index].compare(HELP_CMD1) == 0 || args[index].compare(HELP_CMD2) == 0 || args[index].compare(HELP_CMD3) == 0){
+        if(args[index] == HELP_CMD1 || args[index] == HELP_CMD2 || args[index] == HELP_CMD3){
             Logger::LogNone(HELP_COMMAND);
             return 0;
         }
-        if(args[index].compare(TEXT_CMD1) == 0 || args[index].compare(TEXT_CMD2) == 0){
+        if(args[index] == TEXT_CMD1 || args[index] == TEXT_CMD2){
             if(++index >= args.size()){
                 Logger::LogError(NO_TEXT_ARG_PASSED);
                 return 1;
@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
                 return 1;
             }
         }
-        if(args[index].compare(FILE_CMD1) == 0 || args[index].compare(FILE_CMD2) == 0 || args[index].compare(FILE_CMD3) == 0){
+        if(args[index] == FILE_CMD1 || args[index] == FILE_CMD2 || args[index] == FILE_CMD3){
             if(++index >= args.size()){
                 Logger::LogError(NO_FILE_ARG_PASSED);
                 return 1;
@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
                 return 1;
             }
         }
-        if(args[index].compare(OUTPUT_FILE_CMD1) == 0 || args[index].compare(OUTPUT_FILE_CMD2) == 0){
+        if(args[index] == OUTPUT_FILE_CMD1 || args[index] == OUTPUT_FILE_CMD2){
             if(++index >= args.size()){
                 Logger::LogError(NO_OUTPUT_FILE_ARG_PASSED);
                 return 1;
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
             }
             //TODO verify if name is valid
         }
-        if(args[index].compare(FORCE_FILE_WRITE1) == 0 || args[index].compare(FORCE_FILE_WRITE2) == 0)
+        if(args[index] == FORCE_FILE_WRITE1 || args[index] == FORCE_FILE_WRITE2)
             forceWriteToFile = true;
     }
     if(!fromText && !fromFile){
@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
         }
     }
     if(fromText)
-        UwUifier::uwuify(text);
+        UwUifier::uwuifyByWord(text);
     if(fromFile){
         std::stringstream stream;
         std::string line;

@@ -1,6 +1,5 @@
 #include <string>
 #include <vector>
-#include "Logger.h"
 
 namespace UwUifier{
 
@@ -9,6 +8,8 @@ namespace UwUifier{
         "na", "nya",
         "No", "Nyo",
         "no", "nyo",
+        "Ma", "Mya",
+        "ma", "mya",
         "r", "w",
         "R", "W",
         "l", "w",
@@ -17,7 +18,7 @@ namespace UwUifier{
 
     static void swapWith(std::string &text, std::string &textToFind, std::string &textToImplement){
         size_t pos = text.find(textToFind);
-        std::string tempStr = "";
+        std::string tempStr;
         while(pos != std::string::npos){
             char buffer[pos+1];
             text.copy(buffer, pos);
@@ -32,6 +33,11 @@ namespace UwUifier{
         text.swap(tempStr);
     }
 
+    static void uwuify(std::string &text){
+        for(int index = 0; index < swapPairs.size(); index+=2)
+            swapWith(text, swapPairs[index], swapPairs[index+1]);
+    }
+
     static void swapWithByWord(std::vector<std::string> &words, std::string &textToFind, std::string &textToImplement){
         for(std::string &word : words){
             size_t pos = word.find(textToFind);
@@ -40,11 +46,6 @@ namespace UwUifier{
                 pos = word.find(textToFind);
             }
         }
-    }
-
-    static void uwuify(std::string &text){
-        for(int index = 0; index < swapPairs.size(); index+=2)
-            swapWith(text, swapPairs[index], swapPairs[index+1]);
     }
 
     static void uwuifyByWord(std::string &text){
@@ -63,10 +64,12 @@ namespace UwUifier{
         text.clear();
         for(int index = 0; index < swapPairs.size(); index+=2)
             swapWithByWord(std::ref(words), swapPairs[index], swapPairs[index+1]);
-        for(std::string word : words){
+        for(std::string& word : words){
             text += word + space;
         }
         text.pop_back();
+        if(text[text.size()-1] == '\n')
+            text.pop_back();
     }
 
 }

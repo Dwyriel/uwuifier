@@ -8,7 +8,6 @@ enum LogLevel : char {None, ErrorLog, WarningLog, InfoLog};
 
 class Logger
 {
-    Logger() = delete;
 
     template <typename T>
     static void WriteToConsole(const std::string& color, const std::string& prefix, T const& log_text){
@@ -23,6 +22,7 @@ class Logger
     }
 
 public:
+    Logger() = delete;
 
     template <typename T>
     static void Log(T const& log_text, const char& level = LogLevel::None, const bool& writeToFile = false){
