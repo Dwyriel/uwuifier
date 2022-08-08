@@ -75,157 +75,157 @@
 #define UWU_FREQUENCY1 "-u"
 #define UWU_FREQUENCY2 "--uwu"
 #define CMD_COUNT 16
-const char* ALL_CMDS[CMD_COUNT] = {HELP_CMD1, HELP_CMD2, HELP_CMD3, TEXT_CMD1, TEXT_CMD2, FILE_CMD1, FILE_CMD2, FILE_CMD3, OUTPUT_FILE_CMD1, OUTPUT_FILE_CMD2, FORCE_FILE_WRITE1, FORCE_FILE_WRITE2, STUTTER_FREQUENCE1, STUTTER_FREQUENCE2, UWU_FREQUENCY1, UWU_FREQUENCY2};
+const char *ALL_CMDS[CMD_COUNT] = {HELP_CMD1, HELP_CMD2, HELP_CMD3, TEXT_CMD1, TEXT_CMD2, FILE_CMD1, FILE_CMD2, FILE_CMD3, OUTPUT_FILE_CMD1, OUTPUT_FILE_CMD2, FORCE_FILE_WRITE1, FORCE_FILE_WRITE2,STUTTER_FREQUENCE1, STUTTER_FREQUENCE2, UWU_FREQUENCY1, UWU_FREQUENCY2};
 
 static std::string EXEC_FOLDER_PATH;
 static std::string EXECUTABLE_PATH;
 
-void setProgramPaths(const char* relative_path){
+void setProgramPaths(const char *relative_path) {
     /*char* pointer = realpath(relative_path, NULL);
     if(pointer == NULL)
         return false;*///leaving it here for reference or in case it may be better (pre C++17, though linux only)
 
-    EXECUTABLE_PATH =  std::filesystem::canonical(relative_path);
+    EXECUTABLE_PATH = std::filesystem::canonical(relative_path);
     size_t pos = EXECUTABLE_PATH.find_last_of('/');
-    EXEC_FOLDER_PATH = EXECUTABLE_PATH.substr(0, pos+1);
+    EXEC_FOLDER_PATH = EXECUTABLE_PATH.substr(0, pos + 1);
 }
 
-bool checkIfTextIsCommand(std::string& str){
-    for(const char* &string : ALL_CMDS){
-        if(str == string)
+bool checkIfTextIsCommand(std::string &str) {
+    for (const char *&string: ALL_CMDS) {
+        if (str == string)
             return true;
     }
     return false;
 }
 
 int main(int argc, char **argv) {
-    if(argc <= 1){
+    if (argc <= 1) {
         Logger::LogWarning(NO_ARG_PASSED);
         return 1;
     }
     std::vector<std::string> args;
-    for (int index = 1; index < argc; index ++)
+    for (int index = 1; index < argc; index++)
         args.push_back(argv[index]);
     bool fromText = false, fromFile = false, writeToFile = false, forceWriteToFile = false;
     std::string text, inputFile, outputFile;
-    float stutterFrequency = .15f, uwuFrequency = .3;
-    for(int index = 0; index < args.size(); index++){
-        if(!checkIfTextIsCommand(args[index])){
+    float stutterFrequency = .4, uwuFrequency = .3;
+    for (int index = 0; index < args.size(); index++) {
+        if (!checkIfTextIsCommand(args[index])) {
             Logger::LogError(INVALID_COMMAND(args[index]));
             return 1;
         }
-        if(args[index] == HELP_CMD1 || args[index] == HELP_CMD2 || args[index] == HELP_CMD3){
+        if (args[index] == HELP_CMD1 || args[index] == HELP_CMD2 || args[index] == HELP_CMD3) {
             Logger::LogNone(HELP_COMMAND);
             return 0;
         }
-        if(args[index] == TEXT_CMD1 || args[index] == TEXT_CMD2){
-            if(++index >= args.size()){
+        if (args[index] == TEXT_CMD1 || args[index] == TEXT_CMD2) {
+            if (++index >= args.size()) {
                 Logger::LogError(NO_TEXT_ARG_PASSED);
                 return 1;
             }
             fromText = true;
             text = args[index];
-            if(checkIfTextIsCommand(text)){
+            if (checkIfTextIsCommand(text)) {
                 Logger::LogError(NO_TEXT_ARG_PASSED);
                 return 1;
             }
         }
-        if(args[index] == FILE_CMD1 || args[index] == FILE_CMD2 || args[index] == FILE_CMD3){
-            if(++index >= args.size()){
+        if (args[index] == FILE_CMD1 || args[index] == FILE_CMD2 || args[index] == FILE_CMD3) {
+            if (++index >= args.size()) {
                 Logger::LogError(NO_FILE_ARG_PASSED);
                 return 1;
             }
             fromFile = true;
             inputFile = args[index];
-            if(checkIfTextIsCommand(inputFile)){
+            if (checkIfTextIsCommand(inputFile)) {
                 Logger::LogError(NO_FILE_ARG_PASSED);
                 return 1;
             }
-            if(!std::filesystem::is_regular_file(inputFile)){
+            if (!std::filesystem::is_regular_file(inputFile)) {
                 Logger::LogError(FILE_DOESNT_EXIST);
                 return 1;
             }
         }
-        if(args[index] == OUTPUT_FILE_CMD1 || args[index] == OUTPUT_FILE_CMD2){
-            if(++index >= args.size()){
+        if (args[index] == OUTPUT_FILE_CMD1 || args[index] == OUTPUT_FILE_CMD2) {
+            if (++index >= args.size()) {
                 Logger::LogError(NO_OUTPUT_FILE_ARG_PASSED);
                 return 1;
             }
             writeToFile = true;
             outputFile = args[index];
-            if(checkIfTextIsCommand(outputFile)){
+            if (checkIfTextIsCommand(outputFile)) {
                 Logger::LogError(NO_OUTPUT_FILE_ARG_PASSED);
                 return 1;
             }
             //TODO verify if name is valid
         }
-        if(args[index] == FORCE_FILE_WRITE1 || args[index] == FORCE_FILE_WRITE2)
+        if (args[index] == FORCE_FILE_WRITE1 || args[index] == FORCE_FILE_WRITE2)
             forceWriteToFile = true;
-        if(args[index] == STUTTER_FREQUENCE1 || args[index] == STUTTER_FREQUENCE1){
-            if(++index >= args.size()){
+        if (args[index] == STUTTER_FREQUENCE1 || args[index] == STUTTER_FREQUENCE1) {
+            if (++index >= args.size()) {
                 Logger::LogError(NO_STUTTER_VALUE_PASSED);
                 return 1;
             }
-            if(checkIfTextIsCommand(args[index])){
+            if (checkIfTextIsCommand(args[index])) {
                 Logger::LogError(NO_STUTTER_VALUE_PASSED);
                 return 1;
             }
-            try{
+            try {
                 stutterFrequency = std::stof(args[index]);
-                if(stutterFrequency < 0 || stutterFrequency > 1){
+                if (stutterFrequency < 0 || stutterFrequency > 1) {
                     Logger::LogError(STUTTER_VALUE_OUTOFRANGE);
                     return 1;
                 }
-            }catch(...){
+            } catch (...) {
                 Logger::LogError(STUTTER_VALUE_NAN);
                 return 1;
             }
         }
-        if(args[index] == UWU_FREQUENCY1 || args[index] == UWU_FREQUENCY2){
-            if(++index >= args.size()){
+        if (args[index] == UWU_FREQUENCY1 || args[index] == UWU_FREQUENCY2) {
+            if (++index >= args.size()) {
                 Logger::LogError(NO_UWU_FREQUENCY_PASSED);
                 return 1;
             }
-            if(checkIfTextIsCommand(args[index])){
+            if (checkIfTextIsCommand(args[index])) {
                 Logger::LogError(NO_UWU_FREQUENCY_PASSED);
                 return 1;
             }
-            try{
+            try {
                 uwuFrequency = std::stof(args[index]);
-                if(uwuFrequency < 0 || uwuFrequency > 1){
+                if (uwuFrequency < 0 || uwuFrequency > 1) {
                     Logger::LogError(UWU_FREQUENCY_OUTOFRANGE);
                     return 1;
                 }
-            }catch(...){
+            } catch (...) {
                 Logger::LogError(UWU_FREQUENCY_NAN);
                 return 1;
             }
         }
     }
-    if(!fromText && !fromFile){
+    if (!fromText && !fromFile) {
         Logger::LogError(TEXT_OR_FILE_ARGS_NOT_PASSED);
         return 1;
     }
-    if(fromText && fromFile){
+    if (fromText && fromFile) {
         Logger::LogError(TEXT_AND_FILE_ARGS_PASSED);
         return 1;
     }
-    if(writeToFile && !forceWriteToFile){
-        if(std::filesystem::exists(outputFile)){
+    if (writeToFile && !forceWriteToFile) {
+        if (std::filesystem::exists(outputFile)) {
             Logger::LogError(FILE_ALREADY_EXIST);
             return 1;
         }
     }
-    if(fromFile){
+    if (fromFile) {
         std::stringstream stream;
         std::string line;
         std::fstream file;
         file.open(inputFile, std::ios::in);
-        if(file.bad()){
+        if (file.bad()) {
             Logger::LogError(COULDNT_OPEN_FILE);
             return 1;
         }
-        while (std::getline(file, line)){
+        while (std::getline(file, line)) {
             stream << line << std::endl;
             text += stream.str();
             stream.str(std::string());
@@ -233,10 +233,10 @@ int main(int argc, char **argv) {
         file.close();
     }
     UwUifier::uwuifyByWord(text, stutterFrequency, uwuFrequency);
-    if(writeToFile){
+    if (writeToFile) {
         std::fstream file;
         file.open(outputFile, std::ios::out | std::ios::trunc);
-        if(file.bad()){
+        if (file.bad()) {
             Logger::LogError(COULDNT_WRITE_TO_FILE);
             return 1;
         }
