@@ -245,8 +245,6 @@ int main(int argc, char **argv) {
         Logger::LogInfo(EXPORTED_TO_FILE(outputFile));
         return 0;
     }
-    Logger::Log((fromText) ? TEXT_OUTPUT_MESSAGE : FILE_OUTPUT_MESSAGE);
-    Logger::Log("");
     Logger::Log(text);
     return 0;
 }

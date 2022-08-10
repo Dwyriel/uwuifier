@@ -42,6 +42,9 @@ count_primes
 Makefile
 *cmake*/
 
+#clang
+.cache/*
+
 #Kdevelop
 .kde*/
 *.kdev*
