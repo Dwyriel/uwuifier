@@ -4,8 +4,13 @@ project(uwuifier)
 
 SET(CMAKE_CXX_COMPILER g++)
 
-set (source_dir "${PROJECT_SOURCE_DIR}/src/")
+set(source_dir "${PROJECT_SOURCE_DIR}/src/")
+set(lib_dir "${PROJECT_SOURCE_DIR}/lib/")
+
 file(GLOB source_files "${source_dir}/*.cpp")
+
+add_library(threadpool ${lib_dir}/threadpool/threadpool.cpp)
+link_libraries(threadpool)
 
 add_executable(uwuifier ${source_files})
 
