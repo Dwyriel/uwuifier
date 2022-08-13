@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 
 project(uwuifier)
 
-SET(CMAKE_CXX_COMPILER g++)
+set(CMAKE_CXX_COMPILER g++)
+set(CMAKE_CXX_STANDARD 11)
 
 set(source_dir "${PROJECT_SOURCE_DIR}/src/")
 set(lib_dir "${PROJECT_SOURCE_DIR}/lib/")
