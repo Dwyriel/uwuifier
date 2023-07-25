@@ -1,0 +1,3 @@
+[submodule "DArgumentParser"]
+	path = DArgumentParser
+	url = https://github.com/Dwyriel/DArgumentParser
