@@ -22,7 +22,13 @@ const char *seedDescription = "Seed to be used when randomizing.";
 const char *forceOutputDescription = "Forces output file to be overwritten if it already exists.";
 #endif
 
+#include <cstring>
+
 auto parseArgs(int argc, char **argv) {
+    auto fileError = [](const std::filesystem::path &path, const char *message) {
+        std::cout << path << ' ' << message << '\n';
+        exit(EXIT_FAILURE);
+    };
     DArgumentOption helpOption(DArgumentOptionType::HelpOption, {'h'}, {"help", "hewp"}, helpDescription);
     DArgumentOption versionOption(DArgumentOptionType::VersionOption, {'v'}, {"version", "vewsion"}, versionDescription);
     DArgumentOption inputOption(DArgumentOptionType::InputOption, {'i'}, {"input"}, inputDescription);
@@ -45,20 +51,54 @@ auto parseArgs(int argc, char **argv) {
         exit(EXIT_SUCCESS);
     }
     std::string outputFile = outputOption.GetValue();
-    //todo check if outputFile name is valid and creatable.
+    if (outputOption.WasSet()) {
+        std::filesystem::path outputFilePath(outputFile);
+        if (std::filesystem::exists(outputFilePath)) {
+            if (!std::filesystem::is_regular_file(outputFilePath))
+                fileError(outputFilePath, "already exists but is not a file");
+            if (!forceOutputOption.WasSet())
+                fileError(outputFilePath, "already exists, use the \"force\" option if you wish to overwrite the file");
+        } else {
+            std::ofstream outputFileStream(outputFilePath);
+            if (outputFileStream.fail()) {
+                switch (errno) {
+                    case EACCES:
+                        fileError(outputFilePath, "is not writable, permission denied");
+                        break;
+                    default:
+                        fileError(outputFilePath, "is not a valid file name");
+                        break;
+                }
+            }
+            outputFileStream.close();
+            std::filesystem::remove(outputFilePath);
+        }
+    }
     if (seedOption.WasSet()) {
         //todo parse seed
     }
     if (!inputOption.WasSet() && parser.GetPositionalArguments().empty()) {
-        std::cout << "No text or file passed, nothing to do.\n\n" << parser.HelpText();
+        std::cout << "No text or file passed, nothing to do\n\n" << parser.HelpText();
         exit(EXIT_SUCCESS);
     }
     if (inputOption.WasSet() && !parser.GetPositionalArguments().empty()) {
-        std::cout << "Both a file and some text were passed at the same time.\n\n" << parser.HelpText();
+        std::cout << "Both a file and plain text were passed at the same time\n\n" << parser.HelpText();
         exit(EXIT_FAILURE);
     }
     std::string textToUwUify;
-    if (!inputOption.WasSet()) {
+    if (inputOption.WasSet()) {
+        std::filesystem::path inputFile(inputOption.GetValue());
+        if (!std::filesystem::exists(inputFile))
+            fileError(inputFile, "does not exist");
+        if (!std::filesystem::is_regular_file(inputFile))
+            fileError(inputFile, "is not a file");
+        size_t fileSize = std::filesystem::file_size(inputFile);
+        textToUwUify.resize(fileSize);
+        std::ifstream fileStream(inputFile);
+        fileStream.seekg(0);
+        fileStream.read(&textToUwUify[0], fileSize);
+        fileStream.close();
+    } else {
         size_t argCount = parser.GetPositionalArguments().size();
         size_t reserveAmount = (argCount - 1) * 2; //for adding double newlines between texts.
         for (const auto &arg: parser.GetPositionalArguments())
@@ -69,22 +109,6 @@ auto parseArgs(int argc, char **argv) {
             if (argCount > 1 && (i + 1) % argCount != 0)
                 textToUwUify += "\n\n";
         }
-    } else {
-        auto fileError = [](const std::filesystem::path &path, const char *message) {
-            std::cout << path << ' ' << message << '\n';
-            exit(EXIT_FAILURE);
-        };
-        std::filesystem::path inputFile(inputOption.GetValue());
-        if (!std::filesystem::exists(inputFile))
-            fileError(inputFile, "does not exist");
-        if (!std::filesystem::is_regular_file(inputFile))
-            fileError(inputFile, "is not a regular file");
-        size_t fileSize = std::filesystem::file_size(inputFile);
-        textToUwUify.resize(fileSize);
-        std::ifstream fileStream(inputFile);
-        fileStream.seekg(0);
-        fileStream.read(&textToUwUify[0], fileSize);
-        fileStream.close();
     }
     return std::make_tuple(textToUwUify, (int) 0 /*temp seed*/, outputFile);
 }
