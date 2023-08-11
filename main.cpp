@@ -128,9 +128,8 @@ auto parseArgs(int argc, char **argv) {
     }
     uint64_t seed = defaultSeed;
     if (seedOption.WasSet()) {
-        size_t maxSize = sizeof(uint64_t) * 2;
-        if (seedOption.GetValue().size() > maxSize) {
-            std::cout << "Seed string is too long, needs to be at most " << maxSize << " characters long";
+        if (seedOption.GetValue().size() > maxSeedStringSize) {
+            std::cout << "Seed string is too long, needs to be at most " << maxSeedStringSize << " characters long";
             exit(EXIT_FAILURE);
         }
         seed = convertToSeed(seedOption.GetValue());
@@ -172,7 +171,5 @@ auto parseArgs(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-    auto i = convertToStringAsHex(defaultSeed);
-    auto j = convertToSeedFromHex(i);
     auto [textToUwUify, seed, outputFile] = parseArgs(argc, argv);
 }
